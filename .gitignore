@@ -3,4 +3,5 @@
 
 # Files
 *.js
+.env
 package-lock.json

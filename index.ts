@@ -1,10 +1,29 @@
+// Configure package so environment variables in the .env file are accessible
 require('dotenv').config();
 
-const bannedWords = require('./bannedwords.json');
+// import packages and external files
+const bannedWords: string[] = require('./bannedwords.json');
 
 import { keepAlive } from './keepalive';
-const Discord = require('discord.js')
+import * as Discord from 'discord.js';
 
+// Check if message contains bad word or not
+const containsBannedWord = (msg: string) => {
+	// Split up message by spaces so that compound words aren't caught
+	let words = msg.split(' ');
+
+	// index through the banned words list and return true if the message includes a banned word
+	for (let i = 0; i < bannedWords.length; i++) {
+		if (words.includes(bannedWords[i])) {
+			return true;
+		}
+	}
+
+	// if nothing is found return false
+	return false;
+}
+
+// set up bot with required intents
 const client = new Discord.Client({
 	intents: [
 		Discord.Intents.FLAGS.GUILDS,
@@ -13,15 +32,25 @@ const client = new Discord.Client({
 	]
 });
 
+// when the client is ready, print to console and run express server
 client.on('ready', () => {
-	console.log(`${client.user.tag} is ready!`);
+	console.log(`${client.user?.tag} is ready!`);
 	keepAlive();
 });
 
+// Event is run when someone sends a message in a channel the bot has access to
 client.on('messageCreate', message => {
+	// Only go if author isn't a bot
 	if (!message.author.bot) {
-		message.reply("sus");
+		
+		// If the message contains a banned word, delete it and then log event data to the console
+		if (containsBannedWord(message.content)) {
+			message.delete()
+				.then(m => console.log(`Deleted message reading "${m.content}" from ${m.author.tag}`));
+		}
+
 	}
 });
 
+// login with token provided in environment variables
 client.login(process.env.TOKEN);
