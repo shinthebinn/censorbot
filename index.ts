@@ -32,9 +32,19 @@ const client = new Discord.Client({
 	]
 });
 
-// when the client is ready, print to console and run express server
+// when the client is ready, print to console, check if above function is working, and run express server
 client.on('ready', () => {
 	console.log(`${client.user?.tag} is ready!`);
+
+	let bannedString = bannedWords.reduce((p, c, i) => {
+		if (i == 0) {
+			return c;
+		} 
+		return `${p} ${c}`;
+	});
+
+	console.log(containsBannedWord(bannedString) ? "" : "...but not detecting banned words correctly");
+
 	keepAlive();
 });
 
